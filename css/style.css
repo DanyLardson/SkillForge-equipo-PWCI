@@ -1,0 +1,43 @@
+/*Bienvenida */
+.hero-section {
+    background-color: #16a085 !important;
+    background-image: radial-gradient(ellipse at bottom, rgba(230, 126, 34, 0.7) 0%, transparent 70%),
+                      linear-gradient(180deg, #16a085, #1abc9c) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.05);
+    z-index: 0;
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 1;
+}
+
+/*Tarjeats*/
+.card-hover {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important;
+    z-index: 10;
+}
+
+/* barra categorias */
+aside .card-header {
+    border-radius: 0;
+}
+
+/*imagenes */
+.card-img-top {
+    height: 180px;
+    object-fit: cover;
+}

@@ -1,0 +1,25 @@
+.hero-section {
+    min-height: 100vh;
+    background-color: #16a085 !important;
+    background-image: none !important;
+}
+
+
+.container-fluid.vh-100 {
+    padding: 0;
+}
+
+
+.form-control.is-valid {
+    border-color: #16a085;
+}
+
+
+.form-control.is-invalid {
+    border-color: #e74c3c;
+}
+
+
+.input-group .btn-outline-secondary {
+    border-color: #ced4da;
+}

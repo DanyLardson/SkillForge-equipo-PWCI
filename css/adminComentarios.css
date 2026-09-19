@@ -1,0 +1,25 @@
+.comentario-eliminado {
+    opacity: 0.7;
+    background-color: #f8f9fa;
+}
+
+
+.rounded-circle {
+    object-fit: cover;
+}
+
+
+.card {
+    border-radius: 10px;
+}
+
+
+.modal-content {
+    border-radius: 10px;
+    border: none;
+}
+
+
+.alert-warning {
+    font-size: 0.85rem;
+}

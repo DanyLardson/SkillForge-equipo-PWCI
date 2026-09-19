@@ -1,0 +1,19 @@
+.card {
+    border-radius: 10px;
+}
+
+
+.table th {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.9rem;
+}
+
+.table td.fw-bold {
+    font-size: 1rem;
+}
+
+
+.rounded-circle {
+    object-fit: cover;
+}

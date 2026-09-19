@@ -1,0 +1,139 @@
+.diploma {
+    max-width: 900px;
+    background-color: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.diploma-borde {
+    border: 8px solid #16a085;
+    border-radius: 10px;
+    padding: 60px 40px;
+    position: relative;
+}
+
+.diploma-borde::before {
+    content: "";
+    position: absolute;
+    top: 10px; left: 10px; right: 10px; bottom: 10px;
+    border: 2px solid #e67e22;
+    border-radius: 5px;
+    pointer-events: none;
+}
+
+
+.diploma-logo {
+    font-size: 4rem;
+    color: #e67e22;
+    margin-bottom: 10px;
+}
+
+.diploma-marca {
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+    margin-bottom: 0;
+}
+
+.diploma-subtitulo {
+    color: #16a085;
+    font-size: 1rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+}
+
+
+.diploma-titulo {
+    color: #2c3e50;
+    font-weight: bold;
+    font-size: 1.8rem;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+}
+
+.diploma-texto {
+    color: #6c757d;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+
+.diploma-nombre {
+    color: #2c3e50;
+    font-weight: bold;
+    font-size: 2.5rem;
+    font-style: italic;
+    margin-bottom: 5px;
+}
+
+.diploma-linea {
+    width: 70%;
+    height: 2px;
+    background-color: #e67e22;
+    margin: 0 auto;
+}
+
+.diploma-curso {
+    color: #16a085;
+    font-weight: bold;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.diploma-duracion {
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.diploma-fecha {
+    color: #2c3e50;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+
+.diploma-firma-linea {
+    width: 80%;
+    height: 1px;
+    background-color: #2c3e50;
+    margin: 0 auto 10px;
+}
+
+.diploma-firma-nombre {
+    color: #2c3e50;
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+
+.diploma-firma-rol {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.diploma-folio {
+    color: #6c757d;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+
+@media print {
+    body {
+        background-color: #fff !important;
+    }
+    .d-print-none {
+        display: none !important;
+    }
+    .diploma {
+        box-shadow: none;
+        max-width: 100%;
+        padding: 0;
+    }
+    .diploma-borde {
+        padding: 40px 20px;
+    }
+}

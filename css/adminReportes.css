@@ -1,0 +1,32 @@
+.table th {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+
+.rounded-circle {
+    object-fit: cover;
+}
+
+
+.progress {
+    background-color: #e9ecef;
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+
+.card {
+    border-radius: 10px;
+}
+
+
+.badge {
+    font-weight: 500;
+    padding: 5px 10px;
+}
