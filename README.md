@@ -1,0 +1,5 @@
+Integrantes del equipo
+
+Ian Beil Pérez González 2049360
+
+Daniel Abisai Montelongo Vazquez 2038118
