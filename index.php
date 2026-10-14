@@ -231,29 +231,8 @@ $cursosRecientes = [
                         <h3 class="fw-bold text-dark">Cursos Más Recientes</h3>
                         <a href="#" class="btn btn-sm btn-outline-secondary">Ver todos</a>
                     </div>
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                        
-                        
-                        <?php foreach ($cursosRecientes as $curso): ?>
-                            <div class="col">
-                                <div class="card h-100 shadow-sm border-0 card-hover">
-                                    <img src="<?php echo $curso['imagen']; ?>" class="card-img-top" alt="<?php echo $curso['titulo']; ?>" style="height: 180px; object-fit: cover;">
-                                    <div class="card-body">
-                                        <span class="badge <?php echo $curso['colorBadge']; ?> mb-2"><?php echo $curso['categoria']; ?></span>
-                                        <h5 class="card-title fw-bold"><?php echo $curso['titulo']; ?></h5>
-                                        <p class="card-text text-muted small"><?php echo $curso['descripcion']; ?></p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="text-warning"><i class="fa-solid fa-star"></i> <?php echo $curso['rating']; ?></span>
-                                            <span class="fw-bold text-success"><?php echo $curso['precio']; ?></span>
-                                        </div>
-                                    </div>
-                                    <div class="card-footer bg-white border-0 text-center pb-3">
-                                        <a href="detallesCurso.php?id=<?php echo $curso['id']; ?>" class="btn btn-sm text-white w-100" style="background-color: #2c3e50;">Ver Detalle</a>
-                                </div>
-                            </div>
-                            </div>
-                        <?php endforeach; ?>
-                        
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="contenedor-cursos">
+                        <!-- Los cursos se cargarán con JavaScript desde la API -->
                     </div>
                 </section>
 
@@ -270,5 +249,6 @@ $cursosRecientes = [
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/api-cursos.js"></script>
 </body>
 </html>
