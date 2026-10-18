@@ -25,10 +25,10 @@ document.addEventListener("DOMContentLoaded", function() {
             return response.json();
         })
         .then(data => {
-            console.log("✅ Curso recibido desde la API:");
+            console.log(" Curso recibido desde la API:");
             console.log(data);
         })
         .catch(error => {
-            console.error("❌ Error al cargar el curso desde la API:", error);
+            console.error(" Error al cargar el curso desde la API:", error);
         });
 });
