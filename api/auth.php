@@ -1,6 +1,5 @@
 <?php
-//api/auth.php-login conectado a MySQL
-
+//login conectado a MySQL con bloqueo
 session_start();
 require_once '../config/Database.php';
 
@@ -31,9 +30,11 @@ $stmt = $db->prepare("SELECT * FROM usuarios WHERE email = :email AND activo = 1
 $stmt->execute([':email' => $data['email']]);
 $usuario = $stmt->fetch();
 
-//la contra que pusimos en la BD (Admin123!) ya esta hasheada con password_hash
 if ($usuario && password_verify($data['password'], $usuario['password'])) {
-    //login exitoso
+    //login exito: reseteamos los intentos a 0
+    $reset = $db->prepare("UPDATE usuarios SET intentos_fallidos = 0 WHERE id = :id");
+    $reset->execute([':id' => $usuario['id']]);
+
     $_SESSION['usuario_id'] = $usuario['id'];
     $_SESSION['usuario_nombre'] = $usuario['nombre'];
     $_SESSION['usuario_rol'] = $usuario['rol'];
@@ -45,6 +46,19 @@ if ($usuario && password_verify($data['password'], $usuario['password'])) {
         "rol" => $usuario['rol']
     ]);
 } else {
+    //login fallo: sumamos un intento si el usuario existe
+    if ($usuario) {
+        //verifica si ya estaba bloqueado bloqueado
+        if ($usuario['intentos_fallidos'] >= 3) {
+            http_response_code(403); 
+            echo json_encode(["error" => "Cuenta bloqueada por 3 intentos fallidos."]);
+            exit;
+        }
+        
+        $update = $db->prepare("UPDATE usuarios SET intentos_fallidos = intentos_fallidos + 1 WHERE id = :id");
+        $update->execute([':id' => $usuario['id']]);
+    }
+    
     http_response_code(401);
-    echo json_encode(["error" => "Credenciales incorrectas o cuenta bloqueada"]);
+    echo json_encode(["error" => "Credenciales incorrectas"]);
 }

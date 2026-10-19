@@ -1,0 +1,63 @@
+{
+  "info": {
+    "_postman_id": "27ff4868-8338-4cad-b538-a6b1861e85e9",
+    "name": "SkillForge API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58293255",
+    "_collection_link": "https://go.postman.co/collection/58293255-27ff4868-8338-4cad-b538-a6b1861e85e9?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "GET Listar Cursos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost/PWCI_051_PIA/api/cursos.php",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "PWCI_051_PIA",
+            "api",
+            "cursos.php"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST Crear Curso",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "PUT Actualizar Curso",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE Curso",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "POST Error 401",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    }
+  ]
+}

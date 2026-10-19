@@ -1,23 +1,18 @@
-// =========================================
-// CONSUMO DE LA API PROPIA - CURSOS
-// =========================================
-// Este archivo consume el endpoint /api/cursos.php
-// y genera las tarjetas dinámicamente con fetch.
-// =========================================
+//Consumo de api propia-cursos, este archio consume el endpoint /api/ cursos.php y genera tarjetas dinamicas con fetch
 
 document.addEventListener("DOMContentLoaded", function() {
     
     const contenedor = document.getElementById('contenedor-cursos');
     
-    // Si no existe el contenedor en esta página, salir
+    //si no existe el contenedor en esta pagina, salir
     if (!contenedor) return;
 
     console.log("Cargando cursos desde la API...");
 
-    // Petición fetch a la API propia
+    //peticion fetch a la API
     fetch('api/cursos.php')
         .then(response => {
-            // Verificar que la respuesta sea exitosa
+            //si respuesta exitosa
             if (!response.ok) {
                 throw new Error('Error HTTP: ' + response.status);
             }
@@ -26,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             console.log('Cursos recibidos:', data);
 
-            // Generar las tarjetas dinámicamente
+            //generar las tarjetas 
             let html = '';
             data.cursos.forEach(curso => {
                 html += `
@@ -52,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function() {
             contenedor.innerHTML = html;
         })
         .catch(error => {
-            // Manejo visible del error
+            //manejo error
             console.error('Error al cargar cursos:', error);
             contenedor.innerHTML = `
                 <div class="col-12">
