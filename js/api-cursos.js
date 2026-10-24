@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                 <h5 class="card-title fw-bold">${curso.titulo}</h5>
                                 <p class="card-text text-muted small">${curso.descripcion}</p>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-warning"><i class="fa-solid fa-star"></i> ${curso.calificacion}</span>
+                                    <span class="text-warning"><i class="fa-solid fa-star"></i> ${curso.rating ? curso.rating : '0.0'}</span>
                                     <span class="fw-bold text-success">${curso.precio}</span>
                                 </div>
                             </div>

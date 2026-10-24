@@ -1,4 +1,6 @@
 <?php
+require_once 'core/Auth.php';
+Auth::check('admin'); //Candado pa solo pasar si eres admin
 
 // simulacion, cuantas veces lo he dicho
 $admin = [

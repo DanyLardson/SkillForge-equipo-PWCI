@@ -1,10 +1,11 @@
 <?php
 
-//BAse de datos (simulada por el momento)
+//BAse de datos (simulada por el momento) yaexiste la base, pero segurian por el momento
 
-$usuarioLogueado = true;
-$tipoUsuario = "admin";  
-$nombreUsuario = "María González";
+session_start();
+$usuarioLogueado = isset($_SESSION['usuario_id']);
+$tipoUsuario = $_SESSION['usuario_rol'] ?? 'estudiante';
+$nombreUsuario = $_SESSION['usuario_nombre'] ?? 'Invitado';
 $avatarUsuario = "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg";
 
 $categorias = [
@@ -102,7 +103,7 @@ $cursosRecientes = [
 </head>
 <body>
 
-    
+    <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background-color: #2c3e50;">
         <div class="container-fluid px-4">
             <a class="navbar-brand fw-bold text-white" href="index.php">
@@ -116,52 +117,55 @@ $cursosRecientes = [
                     <input class="form-control me-2" type="search" placeholder="Buscar cursos por título, categoría o instructor..." aria-label="Search">
                     <button class="btn btn-outline-light" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </form>
+                
                 <?php if ($usuarioLogueado): ?>
-    
-    <div class="d-flex align-items-center">
-        <a href="chat.php" class="text-white me-3 text-decoration-none">
-            <i class="fa-solid fa-comments"></i>
-        </a>
-        <div class="dropdown">
-            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-                <img src="<?php echo $avatarUsuario; ?>" class="rounded-circle me-2" width="35" height="35" alt="Avatar">
-                <span><?php echo explode(' ', $nombreUsuario)[0]; ?></span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <?php if ($tipoUsuario === "estudiante"): ?>
-                    <li><a class="dropdown-item" href="kardex.php"><i class="fa-solid fa-book me-2"></i>Mi Kardex</a></li>
-                <?php elseif ($tipoUsuario === "instructor"): ?>
-                    <li><a class="dropdown-item" href="ventas.php"><i class="fa-solid fa-chart-line me-2"></i>Panel de Ventas</a></li>
-                <?php elseif ($tipoUsuario === "admin"): ?>
-                    <li><a class="dropdown-item" href="kardex.php"><i class="fa-solid fa-book me-2"></i>Mi Kardex</a></li>
-                    <li><a class="dropdown-item" href="ventas.php"><i class="fa-solid fa-chart-line me-2"></i>Panel de Ventas</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="adminUsuarios.php"><i class="fa-solid fa-users-cog me-2"></i>Usuarios</a></li>
-                    <li><a class="dropdown-item" href="adminCategorias.php"><i class="fa-solid fa-tags me-2"></i>Categorías</a></li>
-                    <li><a class="dropdown-item" href="adminComentarios.php"><i class="fa-solid fa-comments me-2"></i>Comentarios</a></li>
-                    <li><a class="dropdown-item" href="adminReportes.php"><i class="fa-solid fa-chart-pie me-2"></i>Reportes</a></li>
+                    <div class="d-flex align-items-center">
+                        <a href="chat.php" class="text-white me-3 text-decoration-none">
+                            <i class="fa-solid fa-comments"></i>
+                        </a>
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+                                <img src="<?php echo $avatarUsuario; ?>" class="rounded-circle me-2" width="35" height="35" alt="Avatar">
+                                <span><?php echo explode(' ', $nombreUsuario)[0]; ?></span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <!-- Mi Kardex para todos -->
+                                <li><a class="dropdown-item" href="kardex.php"><i class="fa-solid fa-book me-2"></i>Mi Kardex</a></li>
+                                
+                                <!-- Panel de ventas para instructor y admin -->
+                                <?php if ($tipoUsuario === "instructor" || $tipoUsuario === "admin"): ?>
+                                    <li><a class="dropdown-item" href="ventas.php"><i class="fa-solid fa-chart-line me-2"></i>Panel de Ventas</a></li>
+                                <?php endif; ?>
+
+                                <!-- Opciones de Admin -->
+                                <?php if ($tipoUsuario === "admin"): ?>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="adminUsuarios.php"><i class="fa-solid fa-users-cog me-2"></i>Usuarios</a></li>
+                                    <li><a class="dropdown-item" href="adminCategorias.php"><i class="fa-solid fa-tags me-2"></i>Categorías</a></li>
+                                    <li><a class="dropdown-item" href="adminComentarios.php"><i class="fa-solid fa-comments me-2"></i>Comentarios</a></li>
+                                    <li><a class="dropdown-item" href="adminReportes.php"><i class="fa-solid fa-chart-pie me-2"></i>Reportes</a></li>
+                                <?php endif; ?>
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="login.php" onclick="return confirm('¿Estás seguro de que quieres cerrar sesión?');">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="d-flex">
+                        <a href="login.php" class="btn btn-outline-light me-2">Iniciar Sesión</a>
+                        <a href="registro.php" class="btn text-white" style="background-color: #e67e22;">Registrarse</a>
+                    </div>
                 <?php endif; ?>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <a class="dropdown-item text-danger" href="login.php" onclick="return confirm('¿Estás seguro de que quieres cerrar sesión?');">
-                        <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
-<?php else: ?>
-    
-    <div class="d-flex">
-        <a href="login.php" class="btn btn-outline-light me-2">Iniciar Sesión</a>
-        <a href="registro.php" class="btn text-white" style="background-color: #e67e22;">Registrarse</a>
-    </div>
-<?php endif; ?>
             </div>
         </div>
     </nav>
 
-    
+    <!-- HERO -->
     <header class="hero-section text-white text-center py-5">
         <div class="container position-relative z-1">
             <h1 class="display-4 fw-bold">Aprende a tu ritmo, desde cualquier lugar</h1>
@@ -170,11 +174,11 @@ $cursosRecientes = [
         </div>
     </header>
 
-    
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="container-fluid px-4 my-5">
         <div class="row">
             
-            
+            <!-- SIDEBAR CATEGORÍAS -->
             <aside class="col-md-3 mb-4 ps-0">
                 <div class="card shadow-sm border-0">
                     <div class="card-header text-white fw-bold" style="background-color: #2c3e50;">
@@ -190,17 +194,16 @@ $cursosRecientes = [
                 </div>
             </aside>
 
-            
+            <!-- MAIN -->
             <main class="col-md-9">
                 
-                
+                <!-- Cursos Mejor Calificados -->
                 <section id="cursos" class="mb-5">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3 class="fw-bold text-dark"> Cursos Mejor Calificados</h3>
                         <a href="#" class="btn btn-sm btn-outline-secondary">Ver todos</a>
                     </div>
                     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                        
                         
                         <?php foreach ($cursosMejorCalificados as $curso): ?>
                             <div class="col">
@@ -225,7 +228,7 @@ $cursosRecientes = [
                     </div>
                 </section>
 
-                
+                <!-- Cursos Más Recientes (Fetch) -->
                 <section class="mb-5">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3 class="fw-bold text-dark">Cursos Más Recientes</h3>
@@ -240,7 +243,7 @@ $cursosRecientes = [
         </div>
     </div>
 
-    
+    <!-- FOOTER -->
     <footer class="text-white text-center py-4 mt-5" style="background-color: #2c3e50;">
         <div class="container">
             <p class="mb-1">&copy; 2026 SkillForge </p>

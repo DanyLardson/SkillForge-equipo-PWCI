@@ -1,5 +1,6 @@
 <?php
-
+require_once 'core/Auth.php';
+Auth::check('admin'); //Candado pa solo pasar si eres admin
 
 //ya me quiero dormir, reportes
 $tipoReporte = $_GET['tipo'] ?? 'instructor';

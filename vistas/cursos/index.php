@@ -7,7 +7,7 @@
 </head>
 <body class="p-5 bg-light">
     <div class="container">
-        <h1 class="mb-4">Catalogo de Cursos (Usando MVC)</h1>
+        <h1 class="mb-4">Catalogo de Cursos MVC</h1>
         
         <div class="row">
             <?php foreach ($cursos as $curso): ?>

@@ -22,13 +22,19 @@ if (!$db) {
 $metodo = $_SERVER['REQUEST_METHOD'];
 $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
-//middelware de autorizacion simple
+//middleware autorizacion 
 if (in_array($metodo, ['POST', 'PUT', 'DELETE'])) {
-    $headers = getallheaders();
-    //validacion de que se manda el token 
-    if (!isset($headers['Authorization']) || strpos($headers['Authorization'], 'Bearer ') === false) {
+    //verifica si inicio sesion
+    if (!isset($_SESSION['usuario_id'])) {
         http_response_code(401);
-        echo json_encode(["error" => "no autorizado. falta el token", "codigo" => 401]);
+        echo json_encode(["error" => "No has iniciado sesion", "codigo" => 401]);
+        exit;
+    }
+    
+    //revisamos que el admin sea admin o instructor
+    if ($_SESSION['usuario_rol'] !== 'admin' && $_SESSION['usuario_rol'] !== 'instructor') {
+        http_response_code(403); 
+        echo json_encode(["error" => "No tienes permisos para realizar esta accion", "codigo" => 403]);
         exit;
     }
 }
@@ -74,7 +80,7 @@ switch ($metodo) {
         echo json_encode(["mensaje" => "curso creado exitosamente", "id" => $db->lastInsertId()]);
         break;
 
-    case 'PUT':
+     case 'PUT':
         if (!$id) {
             http_response_code(400);
             echo json_encode(["error" => "se requiere un ID en la URL", "codigo" => 400]);
@@ -82,7 +88,7 @@ switch ($metodo) {
         }
         $data = json_decode(file_get_contents("php://input"), true);
         
-        //veirifica si existe
+        //verifica si existe
         $check = $db->prepare("SELECT id FROM cursos WHERE id = :id");
         $check->execute([':id' => $id]);
         if (!$check->fetch()) {
@@ -91,10 +97,14 @@ switch ($metodo) {
             exit;
         }
 
-        $stmt = $db->prepare("UPDATE cursos SET titulo = :titulo, precio = :precio WHERE id = :id");
+        //actualiza todos los campos 
+        $stmt = $db->prepare("UPDATE cursos SET titulo = :titulo, descripcion = :desc, categoria = :cat, precio = :precio, imagen = :img WHERE id = :id");
         $stmt->execute([
-            ':titulo' => $data['titulo'], 
-            ':precio' => $data['precio'], 
+            ':titulo' => $data['titulo'],
+            ':desc' => $data['descripcion'] ?? '',
+            ':cat' => $data['categoria'] ?? 'General',
+            ':precio' => $data['precio'],
+            ':img' => $data['imagen'] ?? '',
             ':id' => $id
         ]);
         http_response_code(200);

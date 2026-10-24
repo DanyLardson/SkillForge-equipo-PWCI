@@ -1,4 +1,6 @@
 <?php
+require_once 'core/Auth.php';
+Auth::check('instructor'); //solo deja pasar si eres instructor
 
 //Ahora me simulo como instructor (bro con suerte voy a ejercer)
 $instructor = [
