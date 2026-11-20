@@ -115,7 +115,7 @@ $todosLosCursos = [
         "numCalificaciones" => 210,
         "numEstudiantes" => 1890,
         "duracion" => "6 horas",
-        "precio" => "Gratis",
+        "precio" => "$49.99",
         "instructor" => [
             "nombre" => "Sofía Martínez",
             "rol" => "Diseñadora UX/UI",
@@ -402,51 +402,44 @@ if (!$cursoActual) {
     <script src="js/main.js"></script>
     <script src="js/detallesCurso.js"></script>
     <script>
-    function comprarCurso() {
-        const btn = document.getElementById('btnComprar');
-        
-        //sacamos el ID del curso de la URL
-        const params = new URLSearchParams(window.location.search);
-        const cursoId = params.get('id');
+function comprarCurso() {
+    const btn = document.getElementById('btnComprar');
+    const params = new URLSearchParams(window.location.search);
+    const cursoId = params.get('id');
 
-        if (!cursoId) {
-            alert("Error: No se identificó el curso.");
-            return;
-        }
-
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Procesando pago...';
-        btn.disabled = true;
-
-        //petición a nuestra API simulada
-        fetch('api/paypal.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                curso_id: cursoId, 
-                monto: 49.99 
-            })
-        })
-        .then(res => res.json().then(data => ({ status: res.status, body: data })))
-        .then(res => {
-            if (res.status === 200) {
-                //pago exitoso
-                alert('✅ ' + res.body.mensaje + '\n\nID de Transacción: ' + res.body.transaction_id);
-                //aqui podrías redirigir al kardex del alumno
-                window.location.href = 'kardex.php'; 
-            } else {
-                //Error,no ha iniciado sesion, o faltan datos
-                alert('❌ ' + res.body.error);
-                btn.innerHTML = '<i class="fa-brands fa-paypal me-2"></i> Comprar con PayPal';
-                btn.disabled = false;
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Error de conexión al procesar el pago.");
-            btn.innerHTML = '<i class="fa-brands fa-paypal me-2"></i> Comprar con PayPal';
-            btn.disabled = false;
-        });
+    if (!cursoId) {
+        alert("Error: No se identificó el curso.");
+        return;
     }
+
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Conectando con PayPal...';
+    btn.disabled = true;
+
+    // 1. Llamamos a PayPal para que genere la orden
+    fetch('api/paypal.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ curso_id: cursoId, monto: 49.99 })
+    })
+    .then(res => res.json().then(data => ({ status: res.status, body: data })))
+    .then(res => {
+        if (res.status === 201 && res.body.status === "CREATED") {
+            // ¡Aquí está la magia! Si PayPal nos da el link, nos vamos a pagar
+            if (res.body.link_pago) {
+                window.location.href = res.body.link_pago;
+            } else {
+                alert("Error: PayPal no devolvió el link de pago.");
+            }
+        } else {
+            throw new Error(res.body.error || 'Error creando la orden de PayPal');
+        }
+    })
+    .catch(err => {
+        alert('❌ ' + err.message);
+        btn.innerHTML = '<i class="fa-brands fa-paypal me-2"></i> Comprar con PayPal';
+        btn.disabled = false;
+    });
+}
 </script>
 </body>
 </html>
