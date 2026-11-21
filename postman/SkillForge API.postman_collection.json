@@ -1,10 +1,7 @@
 {
   "info": {
-    "_postman_id": "27ff4868-8338-4cad-b538-a6b1861e85e9",
     "name": "SkillForge API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "58293255",
-    "_collection_link": "https://go.postman.co/collection/58293255-27ff4868-8338-4cad-b538-a6b1861e85e9?source=collection_link"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
@@ -15,49 +12,86 @@
         "url": {
           "raw": "http://localhost/PWCI_051_PIA/api/cursos.php",
           "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "path": [
-            "PWCI_051_PIA",
-            "api",
-            "cursos.php"
-          ]
+          "host": ["localhost"],
+          "path": ["PWCI_051_PIA", "api", "cursos.php"]
         }
-      },
-      "response": []
+      }
     },
     {
       "name": "POST Crear Curso",
       "request": {
-        "method": "GET",
-        "header": []
-      },
-      "response": []
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Curso de Prueba Postman\",\n  \"descripcion\": \"Este curso fue creado desde Postman\",\n  \"categoria\": \"IT & Software\",\n  \"precio\": 19.99,\n  \"imagen\": \"https://via.placeholder.com/300\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost/PWCI_051_PIA/api/cursos.php",
+          "protocol": "http",
+          "host": ["localhost"],
+          "path": ["PWCI_051_PIA", "api", "cursos.php"]
+        }
+      }
     },
     {
       "name": "PUT Actualizar Curso",
       "request": {
-        "method": "GET",
-        "header": []
-      },
-      "response": []
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Curso Modificado desde Postman\",\n  \"descripcion\": \"Actualizacion de prueba\",\n  \"categoria\": \"IT & Software\",\n  \"precio\": 25.00,\n  \"imagen\": \"https://via.placeholder.com/300\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost/PWCI_051_PIA/api/cursos.php?id=8",
+          "protocol": "http",
+          "host": ["localhost"],
+          "path": ["PWCI_051_PIA", "api", "cursos.php"],
+          "query": [
+            { "key": "id", "value": "8" }
+          ]
+        }
+      }
     },
     {
       "name": "DELETE Curso",
       "request": {
-        "method": "GET",
-        "header": []
-      },
-      "response": []
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost/PWCI_051_PIA/api/cursos.php?id=8",
+          "protocol": "http",
+          "host": ["localhost"],
+          "path": ["PWCI_051_PIA", "api", "cursos.php"],
+          "query": [
+            { "key": "id", "value": "8" }
+          ]
+        }
+      }
     },
     {
-      "name": "POST Error 401",
+      "name": "POST Error 401 (Sin Sesion)",
       "request": {
-        "method": "GET",
-        "header": []
-      },
-      "response": []
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Curso Sin Sesion\",\n  \"precio\": 10.00\n}"
+        },
+        "url": {
+          "raw": "http://localhost/PWCI_051_PIA/api/cursos.php",
+          "protocol": "http",
+          "host": ["localhost"],
+          "path": ["PWCI_051_PIA", "api", "cursos.php"]
+        }
+      }
     }
   ]
 }

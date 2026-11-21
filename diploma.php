@@ -1,24 +1,44 @@
 <?php
-//datos del diploma para la base de datos simulada
-$diploma = [
-    "folio" => "SF-2026-0001",
-    "fechaTerminacion" => "14 de Septiembre de 2026",
-    "alumno" => [
-        "nombre" => "Maria Gonzalez Perez",
-        "email" => "maria.gonzalez@correo.com"
-    ],
-    "curso" => [
-        "titulo" => "PHP y MySQL desde Cero",
-        "duracion" => "12 horas",
-        "instructor" => "Daniel Montelongo"
-    ],
-    "certifica" => [
-        "nombre" => "SkillForge",
-        "representante" => "Direccion Academica",
-        "firma" => "SkillForge - Plataforma de Cursos en Linea"
-    ]
-];
+session_start();
+require_once 'core/Auth.php';
+Auth::check(); // Solo usuarios logueados
+
+require_once 'config/Database.php';
+$database = new Database();
+$db = $database->connect();
+
+$curso_id = $_GET['curso'] ?? null;
+$usuario_id = $_SESSION['usuario_id'];
+
+// Validar que se pase un curso
+if (!$curso_id) {
+    die("Error: No se especificó un curso para el diploma.");
+}
+
+// Consultar si el alumno está inscrito y si ya terminó
+$query = "SELECT c.titulo, c.descripcion, i.fecha_inscripcion, i.estatus as estado_inscripcion, u.nombre as alumno_nombre, u.email as alumno_email, inst.nombre as instructor_nombre
+          FROM cursos c
+          INNER JOIN inscripciones i ON c.id = i.curso_id
+          INNER JOIN usuarios u ON i.usuario_id = u.id
+          LEFT JOIN usuarios inst ON c.instructor_id = inst.id
+          WHERE c.id = :curso_id AND i.usuario_id = :usuario_id";
+
+$stmt = $db->prepare($query);
+$stmt->execute([':curso_id' => $curso_id, ':usuario_id' => $usuario_id]);
+$diploma = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$diploma) {
+    die("Error: No estás inscrito en este curso o el curso no existe.");
+}
+
+// Si el estatus no es "completado", le podemos poner una fecha ficticia o usar la de inscripción
+$fechaTerminacion = $diploma['estado_inscripcion'] === 'completado' 
+                    ? date('d \d\e F \d\e Y', strtotime($diploma['fecha_inscripcion'])) 
+                    : "Pendiente de completar";
+
+$instructor = $diploma['instructor_nombre'] ?? 'SkillForge';
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -32,7 +52,7 @@ $diploma = [
 </head>
 <body class="bg-light">
 
-    
+    <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm d-print-none" style="background-color: #2c3e50;">
         <div class="container-fluid px-4">
             <a class="navbar-brand fw-bold text-white" href="index.php">
@@ -49,13 +69,10 @@ $diploma = [
         </div>
     </nav>
 
-    
+    <!-- DIPLOMA -->
     <div class="container my-5">
         <div class="diploma mx-auto">
-            
-            
             <div class="diploma-borde">
-                
                 
                 <div class="text-center mb-4">
                     <i class="fa-solid fa-graduation-cap diploma-logo"></i>
@@ -63,52 +80,46 @@ $diploma = [
                     <p class="diploma-subtitulo">Plataforma de Cursos en Linea</p>
                 </div>
 
-                
                 <div class="text-center my-4">
                     <h2 class="diploma-titulo">CERTIFICADO DE FINALIZACION</h2>
                     <p class="diploma-texto">Se otorga el presente certificado a:</p>
                 </div>
 
-                
                 <div class="text-center my-4">
-                    <h2 class="diploma-nombre"><?php echo htmlspecialchars($diploma['alumno']['nombre']); ?></h2>
+                    <h2 class="diploma-nombre"><?php echo htmlspecialchars($diploma['alumno_nombre']); ?></h2>
                     <div class="diploma-linea"></div>
                 </div>
 
-                
                 <div class="text-center my-4">
                     <p class="diploma-texto">Por haber completado satisfactoriamente el curso:</p>
-                    <h3 class="diploma-curso"><?php echo htmlspecialchars($diploma['curso']['titulo']); ?></h3>
+                    <h3 class="diploma-curso"><?php echo htmlspecialchars($diploma['titulo']); ?></h3>
                     <p class="diploma-duracion">
-                        <i class="fa-solid fa-clock me-1"></i> Duracion: <?php echo $diploma['curso']['duracion']; ?>
+                        <i class="fa-solid fa-clock me-1"></i> Fecha de Inscripción: <?php echo date('d/m/Y', strtotime($diploma['fecha_inscripcion'])); ?>
                     </p>
                 </div>
 
-                
                 <div class="text-center my-4">
-                    <p class="diploma-texto">Terminado el dia:</p>
-                    <p class="diploma-fecha"><?php echo $diploma['fechaTerminacion']; ?></p>
+                    <p class="diploma-texto">Fecha de terminación:</p>
+                    <p class="diploma-fecha"><?php echo $fechaTerminacion; ?></p>
                 </div>
 
-                
                 <div class="row mt-5 pt-4">
                     <div class="col-6 text-center">
                         <div class="diploma-firma-linea"></div>
-                        <p class="diploma-firma-nombre"><?php echo htmlspecialchars($diploma['curso']['instructor']); ?></p>
+                        <p class="diploma-firma-nombre"><?php echo htmlspecialchars($instructor); ?></p>
                         <p class="diploma-firma-rol">Instructor del Curso</p>
                     </div>
                     <div class="col-6 text-center">
                         <div class="diploma-firma-linea"></div>
-                        <p class="diploma-firma-nombre"><?php echo htmlspecialchars($diploma['certifica']['representante']); ?></p>
-                        <p class="diploma-firma-rol"><?php echo htmlspecialchars($diploma['certifica']['nombre']); ?></p>
+                        <p class="diploma-firma-nombre">SkillForge</p>
+                        <p class="diploma-firma-rol">Certifica</p>
                     </div>
                 </div>
 
-                
                 <div class="text-center mt-5">
                     <p class="diploma-folio">
                         <i class="fa-solid fa-certificate me-1"></i>
-                        Folio: <?php echo $diploma['folio']; ?>
+                        Folio: SF-<?php echo date('Y') . '-' . str_pad($curso_id, 4, "0", STR_PAD_LEFT) . '-' . $usuario_id; ?>
                     </p>
                 </div>
 
@@ -116,7 +127,6 @@ $diploma = [
         </div>
     </div>
 
-    
     <footer class="text-white text-center py-4 mt-5 d-print-none" style="background-color: #2c3e50;">
         <div class="container">
             <p class="mb-1">&copy; 2026 SkillForge</p>
