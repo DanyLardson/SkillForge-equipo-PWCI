@@ -18,11 +18,12 @@ $categorias = [
     "Arte y Música"
 ];
 
-// --- CAMBIO DEL BUSCADOR ---
-$busqueda = $_GET['q'] ?? null; 
+// buscador y filtro por categoria
+$busqueda = $_GET['q'] ?? null;
+$categoriaSeleccionada = $_GET['categoria'] ?? null;
 
 $modelo = new Curso();
-$cursosReales = $modelo->obtenerTodos($busqueda); 
+$cursosReales = $modelo->obtenerTodos($busqueda, $categoriaSeleccionada);
 
 $cursosMejorCalificados = array_slice($cursosReales, 0, 3);
 ?>
@@ -120,7 +121,9 @@ $cursosMejorCalificados = array_slice($cursosReales, 0, 3);
                     <ul class="list-group list-group-flush">
                         <?php foreach ($categorias as $categoria): ?>
                             <li class="list-group-item">
-                                <a href="#" class="text-decoration-none text-dark"><?php echo $categoria; ?></a>
+                                <a href="index.php?categoria=<?php echo urlencode($categoria); ?>" class="text-decoration-none text-dark">
+                                    <?php echo htmlspecialchars($categoria); ?>
+                                </a>
                             </li>
                         <?php endforeach; ?>
                     </ul>

@@ -11,19 +11,24 @@ class Curso {
     }
 
     //consulta para traer los cursos actuvos
-    public function obtenerTodos($busqueda = null) {
-        if ($busqueda) {
-            //si hay busquda filtra por tipo y categoria
-            $query = "SELECT * FROM cursos WHERE activo = 1 AND (titulo LIKE :busqueda OR categoria LIKE :busqueda)";
-            $stmt = $this->db->prepare($query);
-            $termino = '%' . $busqueda . '%';
-            $stmt->bindParam(':busqueda', $termino);
-            $stmt->execute();
-        } else {
-            //si no hay busqueda trae todo
-            $stmt = $this->db->query("SELECT * FROM cursos WHERE activo = 1");
-        }
-        return $stmt->fetchAll();
+    public function obtenerTodos($busqueda = null, $categoria = null) {
+    $query = "SELECT * FROM cursos WHERE activo = 1";
+    $parametros = [];
+
+    if (!empty($busqueda)) {
+        $query .= " AND (titulo LIKE :busqueda OR categoria LIKE :busqueda)";
+        $parametros[':busqueda'] = '%' . $busqueda . '%';
+    }
+
+    if (!empty($categoria) && $categoria !== "Todas las categorías") {
+        $query .= " AND categoria = :categoria";
+        $parametros[':categoria'] = $categoria;
+    }
+
+    $stmt = $this->db->prepare($query);
+    $stmt->execute($parametros);
+
+    return $stmt->fetchAll();
     }
 
     //cursos en los que esta inscrito el alumno
@@ -65,6 +70,31 @@ class Curso {
         $stmt->bindParam(':instructor_id', $instructor_id);
         $stmt->execute();
         return $stmt->fetchAll();
+    }
+
+      // obtener detalles de curso solo por la id
+    public function obtenerPorId($id) {
+        $stmt = $this->db->prepare("SELECT c.*, u.nombre as instructor_nombre FROM cursos c LEFT JOIN usuarios u ON c.instructor_id = u.id WHERE c.id = :id AND c.activo = 1");
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch();
+    }
+
+    //obtener comentarios reales de un curso
+    public function obtenerComentarios($curso_id) {
+        $stmt = $this->db->prepare("SELECT co.*, u.nombre as usuario_nombre FROM comentarios co INNER JOIN usuarios u ON co.usuario_id = u.id WHERE co.curso_id = :curso_id AND co.eliminado = 0 ORDER BY co.fecha_creacion DESC");
+        $stmt->execute([':curso_id' => $curso_id]);
+        return $stmt->fetchAll();
+    }
+
+    //guardar nevo comentario
+    public function guardarComentario($curso_id, $usuario_id, $comentario, $calificacion) {
+        $stmt = $this->db->prepare("INSERT INTO comentarios (curso_id, usuario_id, comentario, calificacion) VALUES (:curso_id, :usuario_id, :comentario, :calificacion)");
+        return $stmt->execute([
+            ':curso_id' => $curso_id,
+            ':usuario_id' => $usuario_id,
+            ':comentario' => $comentario,
+            ':calificacion' => $calificacion
+        ]);
     }
 }
 ?>

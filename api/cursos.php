@@ -3,6 +3,7 @@
 
 session_start();
 require_once '../config/Database.php';
+require_once '../modelos/Curso.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -20,7 +21,24 @@ if (!$db) {
 }
 
 $metodo = $_SERVER['REQUEST_METHOD'];
-$id = isset($_GET['id']) ? (int)$_GET['id'] : null;
+$id = null;
+
+if (isset($_GET['id'])) {
+    if (
+        !is_string($_GET['id']) ||
+        !ctype_digit($_GET['id']) ||
+        (int)$_GET['id'] < 1
+    ) {
+        http_response_code(400);
+        echo json_encode([
+            "error" => "el ID debe ser un numero entero positivo",
+            "codigo" => 400
+        ]);
+        exit;
+    }
+
+    $id = (int)$_GET['id'];
+}
 
 //middleware autorizacion 
 if (in_array($metodo, ['POST', 'PUT', 'DELETE'])) {
@@ -53,8 +71,9 @@ switch ($metodo) {
                 echo json_encode(["error" => "curso no encontrado", "codigo" => 404]);
             }
         } else {
-            $stmt = $db->query("SELECT * FROM cursos WHERE activo = 1");
-            $cursos = $stmt->fetchAll();
+            $modelo = new Curso();
+            $cursos = $modelo->obtenerTodos();
+
             http_response_code(200);
             echo json_encode(["total" => count($cursos), "cursos" => $cursos]);
         }
