@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'modelos/Curso.php'; //ahora con el modelo real
+require_once 'modelos/Curso.php'; 
 
 $usuarioLogueado = isset($_SESSION['usuario_id']);
 $tipoUsuario = $_SESSION['usuario_rol'] ?? 'estudiante';
@@ -18,11 +18,12 @@ $categorias = [
     "Arte y Música"
 ];
 
-// traeos los cursos reales de la base de datos
-$modelo = new Curso();
-$cursosReales = $modelo->obtenerTodos(); 
+// --- CAMBIO DEL BUSCADOR ---
+$busqueda = $_GET['q'] ?? null; 
 
-// simula los 3 mejor calificados, solo esta tomando los 3 primeros
+$modelo = new Curso();
+$cursosReales = $modelo->obtenerTodos($busqueda); 
+
 $cursosMejorCalificados = array_slice($cursosReales, 0, 3);
 ?>
 <!DOCTYPE html>
@@ -47,8 +48,9 @@ $cursosMejorCalificados = array_slice($cursosReales, 0, 3);
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <form class="d-flex mx-auto" style="width: 50%;">
-                    <input class="form-control me-2" type="search" placeholder="Buscar cursos por título, categoría o instructor..." aria-label="Search">
+                <!-- formulario para busqueda actualizado -->
+                <form class="d-flex mx-auto" style="width: 50%;" method="GET" action="index.php">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Buscar cursos..." value="<?php echo htmlspecialchars($busqueda ?? ''); ?>">
                     <button class="btn btn-outline-light" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </form>
                 
@@ -128,16 +130,16 @@ $cursosMejorCalificados = array_slice($cursosReales, 0, 3);
             <!-- main -->
             <main class="col-md-9">
                 
-                <!-- cursos mejor calificados, ya vienen los reales bro -->
+                <!-- cursos reales y buscador -->
                 <section id="cursos" class="mb-5">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3 class="fw-bold text-dark">Nuestros Cursos</h3>
-                        <a href="#" class="btn btn-sm btn-outline-secondary">Ver todos</a>
+                        <a href="index.php" class="btn btn-sm btn-outline-secondary">Ver todos</a>
                     </div>
                     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                         
                         <?php if (empty($cursosMejorCalificados)): ?>
-                            <div class="col-12"><p class="text-muted">No hay cursos disponibles aun.</p></div>
+                            <div class="col-12"><p class="text-muted">No se encontraron cursos que coincidan con tu búsqueda.</p></div>
                         <?php else: ?>
                             <?php foreach ($cursosMejorCalificados as $curso): ?>
                                 <div class="col">

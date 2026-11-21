@@ -11,8 +11,18 @@ class Curso {
     }
 
     //consulta para traer los cursos actuvos
-    public function obtenerTodos() {
-        $stmt = $this->db->query("SELECT * FROM cursos WHERE activo = 1");
+    public function obtenerTodos($busqueda = null) {
+        if ($busqueda) {
+            //si hay busquda filtra por tipo y categoria
+            $query = "SELECT * FROM cursos WHERE activo = 1 AND (titulo LIKE :busqueda OR categoria LIKE :busqueda)";
+            $stmt = $this->db->prepare($query);
+            $termino = '%' . $busqueda . '%';
+            $stmt->bindParam(':busqueda', $termino);
+            $stmt->execute();
+        } else {
+            //si no hay busqueda trae todo
+            $stmt = $this->db->query("SELECT * FROM cursos WHERE activo = 1");
+        }
         return $stmt->fetchAll();
     }
 
