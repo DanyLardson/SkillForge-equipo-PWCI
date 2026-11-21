@@ -135,8 +135,8 @@ $totalDetalle = array_sum(array_column($alumnosDetalle, 'precio'));
                             <li><a class="dropdown-item" href="index.php">Inicio</a></li>
                             <li><a class="dropdown-item" href="#">Mis Cursos</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="login.php" onclick="return confirm('¿Estás seguro de que quieres cerrar sesión?');">
-                                  <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión
+                            <li><a class="dropdown-item text-danger" href="logout.php" onclick="return confirm('¿Estás seguro de que quieres cerrar sesión?');">
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión
                                 </a>
                             </li>
                         </ul>

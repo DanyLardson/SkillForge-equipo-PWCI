@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// api/paypal.php - CONEXIÓN REAL A PAYPAL SANDBOX
+//la conexion REAL a paypal
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -12,7 +12,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
-// 1. Validar usuario logueado
+//validar al usuario logueado
 if (!isset($_SESSION['usuario_id'])) {
     http_response_code(401);
     echo json_encode(["error" => "Debes iniciar sesión para comprar"]);
@@ -33,12 +33,12 @@ if (empty($data['curso_id']) || empty($data['monto'])) {
     exit;
 }
 
-// --- CONFIGURACIÓN DE PAYPAL SANDBOX (Tus credenciales reales) ---
+//configuaciones de paypal sandbox
 $clientID = "AbOz1rxRTT7nQMMccbS3UgWAccGFXizLWTb4xNBlpFYLCgZyqAVwFvaxnOPaZc47pIoV4B1YiHqFaYse"; 
 $secret = "EOuYlwPqxAP1QA3TzoP8FQCLpt9m6OEqkn79Mwe9rKSXe_bso7_5HHclkoVSOITCu71_gMVTv1-Y4QQA";
 $url_api = "https://api-m.sandbox.paypal.com";
 
-// 2. Obtener el Token de Acceso de PayPal
+//Token de acceso al paypal 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url_api . '/v1/oauth2/token');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -66,7 +66,7 @@ if (!$accessToken) {
     exit;
 }
 
-// 3. Crear la Orden de Pago en PayPal
+//orden de pago en paypal
 $monto = number_format((float)$data['monto'], 2, '.', '');
 $payload = json_encode([
     "intent" => "CAPTURE",
@@ -101,9 +101,9 @@ if ($err) {
 
 $order = json_decode($result);
 
-// 4. Devolver la respuesta exitosa (o el error de PayPal)
+//mandar respuesta exitosa o error
 if (isset($order->id)) {
-    http_response_code(201); // 201 Created
+    http_response_code(201); //created
     echo json_encode([
         "status" => "CREATED",
         "mensaje" => "Orden de PayPal creada correctamente",

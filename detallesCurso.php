@@ -412,10 +412,10 @@ function comprarCurso() {
         return;
     }
 
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Conectando con PayPal...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Procesando pago...';
     btn.disabled = true;
 
-    // 1. Llamamos a PayPal para que genere la orden
+    //llamamos a paypal para mandar la orden, el api de terceros
     fetch('api/paypal.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -424,15 +424,22 @@ function comprarCurso() {
     .then(res => res.json().then(data => ({ status: res.status, body: data })))
     .then(res => {
         if (res.status === 201 && res.body.status === "CREATED") {
-            // ¡Aquí está la magia! Si PayPal nos da el link, nos vamos a pagar
-            if (res.body.link_pago) {
-                window.location.href = res.body.link_pago;
-            } else {
-                alert("Error: PayPal no devolvió el link de pago.");
-            }
+            //si paypal dice ok, le pedimos a nuestro controlador guardrlo en la base de datos
+            let formData = new FormData();
+            formData.append('curso_id', cursoId);
+            formData.append('monto', 49.99);
+
+            return fetch('controladores/CursoController.php?accion=comprar', {
+                method: 'POST',
+                body: formData
+            });
         } else {
-            throw new Error(res.body.error || 'Error creando la orden de PayPal');
+            throw new Error(res.body.error || 'Error al conectar con PayPal');
         }
+    })
+    .then(response => {
+        //si todo sale bien manda al kardex
+        window.location.href = 'kardex.php?compra=exitosa';
     })
     .catch(err => {
         alert('❌ ' + err.message);

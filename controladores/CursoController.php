@@ -11,19 +11,21 @@ class CursoController {
         require_once __DIR__ . '/../vistas/cursos/index.php';
     }
 
-    // Nueva función para procesar la compra
     public function comprar() {
-        session_start();
+        // Si la sesión no está iniciada, la iniciamos
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         
+        // Validar que el usuario esté logueado
         if (!isset($_SESSION['usuario_id'])) {
-            header('Location: login.php');
-            exit;
+            die("Error: No hay sesión iniciada. Por favor, inicia sesión primero.");
         }
 
         $curso_id = $_POST['curso_id'] ?? null;
         $monto = $_POST['monto'] ?? 0;
         $usuario_id = $_SESSION['usuario_id'];
-        $metodo_pago = 'PayPal'; // Forzamos PayPal porque ya validamos el pago
+        $metodo_pago = 'PayPal'; 
 
         if (!$curso_id) {
             die("Error: Curso no válido.");
@@ -45,14 +47,13 @@ class CursoController {
             
             $stmt->execute();
 
-            // Redirigir al Kardex
-            header('Location: ../kardex.php?compra=exitosa');
+            // Redirigir al Kardex (Ajustado para que funcione desde la raíz)
+            header('Location: kardex.php?compra=exitosa');
             exit;
 
         } catch (PDOException $e) {
             die("Error al procesar la compra: " . $e->getMessage());
         }
-
     }
 }
 ?>

@@ -1,24 +1,44 @@
 <?php
+session_start();
 
-//de momento todo esta simulado
+//si ya tiene sesion iniciada redirigira al incio
+if (isset($_SESSION['usuario_id'])) {
+    header("Location: index.php");
+    exit;
+}
+
 $error = "";
 $email = "";
 
-
+//con el formulario iniciado se procesa el login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    //validacion para servidor
     if (empty($email) || empty($password)) {
         $error = "Por favor, completa todos los campos.";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = "El correo electrónico no es válido.";
     } else {
+        //peiticion a apii interna
+        $datos = json_encode(['email' => $email, 'password' => $password]);
         
-        header("Location: index.php");
-        exit;
+        $ch = curl_init('http://localhost/PWCI_051_PIA/api/auth.php'); 
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $datos);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        
+        $respuesta = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code === 200) {
+            //si dice ok redirigimos al inciio
+            header("Location: index.php");
+            exit;
+        } else {
+            $json = json_decode($respuesta, true);
+            $error = $json['error'] ?? 'Error al iniciar sesión.';
+        }
     }
 }
 ?>

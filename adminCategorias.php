@@ -97,7 +97,7 @@ Auth::check('admin'); //Candado pa solo pasar si eres admin
     </div>
 
     
-    <!-- Boton y modal para crear cursos   -->
+    <!-- Boton y modal para crear cursos -->
     
     
     <button type="button" class="btn btn-success shadow-lg" data-bs-toggle="modal" data-bs-target="#modalCrearCurso" style="position:fixed; bottom: 30px; right: 30px; z-index: 1000; border-radius: 50%; width: 65px; height: 65px; font-size: 28px;">
@@ -149,6 +149,7 @@ Auth::check('admin'); //Candado pa solo pasar si eres admin
         fetch('api/cursos.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include', //bro esto lo agregue cinco palabras C L A V E
             body: JSON.stringify(datos)
         })
         .then(res => res.json().then(data => ({ status: res.status, body: data })))
