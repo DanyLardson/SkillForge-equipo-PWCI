@@ -1,78 +1,56 @@
 <?php
 require_once 'core/Auth.php';
-Auth::check('admin'); //Candado pa solo pasar si eres admin
+Auth::check('admin'); // Solo admins
 
-//ya me quiero dormir, reportes
+require_once 'config/Database.php';
+$database = new Database();
+$db = $database->connect();
+
+//obtener todos los usuarios pare el reporte
+$stmt = $db->query("SELECT id, nombre, email, rol, fecha_registro FROM usuarios WHERE activo = 1");
+$usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$instructores = [];
+$estudiantes = [];
+
+//clasificar y calcular estadisticas
+foreach ($usuarios as $user) {
+    if ($user['rol'] === 'instructor' || $user['rol'] === 'admin') {
+        //calcular ganancias para instructores
+        $q = $db->prepare("SELECT SUM(i.monto_pagado) as ganancias, COUNT(DISTINCT c.id) as cursos 
+                           FROM cursos c 
+                           LEFT JOIN inscripciones i ON c.id = i.curso_id 
+                           WHERE c.instructor_id = :id");
+        $q->execute([':id' => $user['id']]);
+        $stats = $q->fetch(PDO::FETCH_ASSOC);
+
+        $instructores[] = [
+            'nombre' => $user['nombre'],
+            'email' => $user['email'],
+            'fecha_registro' => $user['fecha_registro'],
+            'cursos' => $stats['cursos'] ?? 0,
+            'ganancias' => $stats['ganancias'] ?? 0
+        ];
+    } else {
+        //calcular cursos para estudiantes
+        $q = $db->prepare("SELECT COUNT(id) as cursos FROM inscripciones WHERE usuario_id = :id");
+        $q->execute([':id' => $user['id']]);
+        $stats = $q->fetch(PDO::FETCH_ASSOC);
+
+        $estudiantes[] = [
+            'nombre' => $user['nombre'],
+            'email' => $user['email'],
+            'fecha_registro' => $user['fecha_registro'],
+            'cursos' => $stats['cursos'] ?? 0,
+            'porcentaje' => 0 //aquie se podria calcular el prosentaje real si tuvieramos mas datos
+        ];
+    }
+}
+
 $tipoReporte = $_GET['tipo'] ?? 'instructor';
-
-
-$instructores = [
-    [
-        "usuario" => "daniel.montelongo",
-        "nombre" => "Daniel Montelongo",
-        "avatar" => "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg",
-        "fechaIngreso" => "10 Ene 2026",
-        "cursosOfrecidos" => 4,
-        "totalGanancias" => 15015.97
-    ],
-    [
-        "usuario" => "ana.lopez",
-        "nombre" => "Ana López",
-        "avatar" => "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg",
-        "fechaIngreso" => "05 Feb 2026",
-        "cursosOfrecidos" => 2,
-        "totalGanancias" => 4820.50
-    ],
-    [
-        "usuario" => "sofia.martinez",
-        "nombre" => "Sofía Martínez",
-        "avatar" => "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg",
-        "fechaIngreso" => "12 Feb 2026",
-        "cursosOfrecidos" => 3,
-        "totalGanancias" => 7350.00
-    ]
-];
-
-
-$estudiantes = [
-    [
-        "usuario" => "maria.gonzalez",
-        "nombre" => "María González",
-        "avatar" => "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg",
-        "fechaIngreso" => "15 Ene 2026",
-        "cursosInscritos" => 5,
-        "porcentajeTerminados" => 40
-    ],
-    [
-        "usuario" => "carlos.quiroz",
-        "nombre" => "Carlos Quiroz",
-        "avatar" => "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg",
-        "fechaIngreso" => "20 Ene 2026",
-        "cursosInscritos" => 3,
-        "porcentajeTerminados" => 66
-    ],
-    [
-        "usuario" => "juan.perez",
-        "nombre" => "Juan Pérez",
-        "avatar" => "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg",
-        "fechaIngreso" => "08 Feb 2026",
-        "cursosInscritos" => 2,
-        "porcentajeTerminados" => 100
-    ],
-    [
-        "usuario" => "laura.fernandez",
-        "nombre" => "Laura Fernández",
-        "avatar" => "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg",
-        "fechaIngreso" => "01 Feb 2026",
-        "cursosInscritos" => 4,
-        "porcentajeTerminados" => 25
-    ]
-];
-
-
-$totalInstructores = count($instructores);
-$totalEstudiantes = count($estudiantes);
-$totalGananciasGlobal = array_sum(array_column($instructores, 'totalGanancias'));
+$fechaDesde = $_GET['fechaDesde'] ?? null;
+$fechaHasta = $_GET['fechaHasta'] ?? null;
+$totalGananciasGlobal = array_sum(array_column($instructores, 'ganancias'));
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -159,7 +137,7 @@ $totalGananciasGlobal = array_sum(array_column($instructores, 'totalGanancias'))
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="text-uppercase mb-1" style="opacity: 0.8;">Total Usuarios</h6>
-                                <h2 class="fw-bold mb-0"><?php echo $tipoReporte === 'instructor' ? $totalInstructores : $totalEstudiantes; ?></h2>
+                                <h2 class="fw-bold mb-0"><?php echo $tipoReporte === 'instructor' ? count($instructores) : count($estudiantes); ?></h2>
                             </div>
                             <i class="fa-solid fa-users fa-2x" style="opacity: 0.5;"></i>
                         </div>
@@ -179,8 +157,9 @@ $totalGananciasGlobal = array_sum(array_column($instructores, 'totalGanancias'))
                                         $<?php echo number_format($totalGananciasGlobal, 2); ?>
                                     <?php else: ?>
                                         <?php 
-                                        $promedio = $totalEstudiantes > 0 ? array_sum(array_column($estudiantes, 'porcentajeTerminados')) / $totalEstudiantes : 0;
-                                        echo round($promedio) . '%';
+                                            //como ahora todos tienen 0% por defecto, el promedio es 0
+                                            $promedio = count($estudiantes) > 0 ? array_sum(array_column($estudiantes, 'porcentaje')) / count($estudiantes) : 0;
+                                            echo round($promedio) . '%';
                                         ?>
                                     <?php endif; ?>
                                 </h2>
@@ -231,39 +210,42 @@ $totalGananciasGlobal = array_sum(array_column($instructores, 'totalGanancias'))
                             <?php if ($tipoReporte === 'instructor'): ?>
                                 <?php foreach ($instructores as $inst): ?>
                                     <tr>
-                                        <td class="fw-semibold"><?php echo htmlspecialchars($inst['usuario']); ?></td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <img src="<?php echo $inst['avatar']; ?>" class="rounded-circle me-2" width="30" height="30" alt="Avatar">
+                                        <td class="fw-semibold"><?php echo htmlspecialchars($inst['email']); ?></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                <!-- esto quita la imagen para que no salga raro o el url -->
+                                                    <i class="fa-solid fa-user-circle me-2 fs-4 text-muted"></i>
                                                 <?php echo htmlspecialchars($inst['nombre']); ?>
                                             </div>
                                         </td>
-                                        <td><?php echo $inst['fechaIngreso']; ?></td>
-                                        <td><span class="badge bg-info text-dark"><?php echo $inst['cursosOfrecidos']; ?></span></td>
+                                        <td><?php echo date('d M Y', strtotime($inst['fecha_registro'])); ?></td>
+                                        <td><span class="badge bg-info text-dark"><?php echo $inst['cursos']; ?></span></td>
                                         <td class="fw-bold" style="color: #16a085;">
-                                            $<?php echo number_format($inst['totalGanancias'], 2); ?>
+                                            $<?php echo number_format($inst['ganancias'], 2); ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <?php foreach ($estudiantes as $est): ?>
                                     <tr>
-                                        <td class="fw-semibold"><?php echo htmlspecialchars($est['usuario']); ?></td>
+                                        <td class="fw-semibold"><?php echo htmlspecialchars($est['email']); ?></td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <img src="<?php echo $est['avatar']; ?>" class="rounded-circle me-2" width="30" height="30" alt="Avatar">
+                                                <i class="fa-solid fa-user-circle me-2 fs-4 text-muted"></i>
                                                 <?php echo htmlspecialchars($est['nombre']); ?>
                                             </div>
                                         </td>
-                                        <td><?php echo $est['fechaIngreso']; ?></td>
-                                        <td><span class="badge bg-info text-dark"><?php echo $est['cursosInscritos']; ?></span></td>
+                                        <td><?php echo date('d M Y', strtotime($est['fecha_registro'])); ?></td>
+                                        <td><span class="badge bg-info text-dark"><?php echo $est['cursos']; ?></span></td>
                                         <td>
+                                            <span class="fw-bold small"><?php echo $est['porcentaje']; ?>%</span>
+                                        </td>
                                             <div class="d-flex align-items-center">
                                                 <div class="progress me-2" style="height: 8px; width: 80px;">
-                                                    <div class="progress-bar <?php echo $est['porcentajeTerminados'] >= 50 ? 'bg-success' : 'bg-warning'; ?>" 
-                                                         style="width: <?php echo $est['porcentajeTerminados']; ?>%;"></div>
+                                                    <div class="progress-bar <?php echo $est['porcentaje'] >= 50 ? 'bg-success' : 'bg-warning'; ?>" 
+                                                         style="width: <?php echo $est['porcentaje']; ?>%;"></div>
                                                 </div>
-                                                <span class="fw-bold small"><?php echo $est['porcentajeTerminados']; ?>%</span>
+                                                <span class="fw-bold small"><?php echo $est['porcentaje']; ?>%</span>
                                             </div>
                                         </td>
                                     </tr>
