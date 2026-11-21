@@ -13,8 +13,8 @@ class Auth {
 
         //validar si el rol que se pidio es uno en especifico
         if ($rolRequerido !== null) {
-            if ($_SESSION['usuario_rol'] !== $rolRequerido) {
-                //si no tiene rol, pal idex con su mensaje de error
+            //bro te va a dejar si es el rol que se requiere o si eres el admin
+            if ($_SESSION['usuario_rol'] !== $rolRequerido && $_SESSION['usuario_rol'] !== 'admin') {
                 header('Location: index.php?error=sin_permisos');
                 exit;
             }

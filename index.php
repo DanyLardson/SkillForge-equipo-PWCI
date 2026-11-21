@@ -67,7 +67,6 @@ $cursosMejorCalificados = array_slice($cursosReales, 0, 3);
                                 
                                 <?php if ($tipoUsuario === "instructor" || $tipoUsuario === "admin"): ?>
                                     <li><a class="dropdown-item" href="ventas.php"><i class="fa-solid fa-chart-line me-2"></i>Panel de Ventas</a></li>
-                                    <li><a class="dropdown-item" href="adminCategorias.php"><i class="fa-solid fa-plus-circle me-2"></i>Crear Curso</a></li>
                                 <?php endif; ?>
 
                                 <?php if ($tipoUsuario === "admin"): ?>

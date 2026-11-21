@@ -27,5 +27,34 @@ class Curso {
         $stmt->execute();
         return $stmt->fetchAll();
     }
+    
+    // resumen de ventas para un instructor especifico
+    public function obtenerResumenVentas($instructor_id) {
+        $query = "SELECT 
+                    COUNT(i.id) as total_alumnos,
+                    SUM(i.monto_pagado) as total_ingresos
+                  FROM inscripciones i
+                  INNER JOIN cursos c ON i.curso_id = c.id
+                  WHERE c.instructor_id = :instructor_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':instructor_id', $instructor_id);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
+
+    //ventas agrupadas por curso para un instructor
+    public function obtenerVentasPorCurso($instructor_id) {
+        $query = "SELECT c.id, c.titulo, c.categoria, 
+                    COUNT(i.id) as alumnos,
+                    SUM(i.monto_pagado) as ingresos
+                  FROM cursos c
+                  LEFT JOIN inscripciones i ON c.id = i.curso_id
+                  WHERE c.instructor_id = :instructor_id
+                  GROUP BY c.id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':instructor_id', $instructor_id);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 }
 ?>

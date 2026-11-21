@@ -1,99 +1,32 @@
 <?php
 require_once 'core/Auth.php';
-Auth::check('instructor'); //solo deja pasar si eres instructor
+Auth::check('instructor'); // Solo instructores o admins
 
-//Ahora me simulo como instructor (bro con suerte voy a ejercer)
+require_once 'modelos/Curso.php';
+
+// Datos del instructor logueado
+$instructor_id = $_SESSION['usuario_id'];
 $instructor = [
-    "nombre" => "Daniel Montelongo",
+    "nombre" => $_SESSION['usuario_nombre'] ?? 'Instructor',
     "avatar" => "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg"
 ];
 
+// Consultas a la base de datos real
+$modelo = new Curso();
+$resumen = $modelo->obtenerResumenVentas($instructor_id);
+$cursos = $modelo->obtenerVentasPorCurso($instructor_id);
 
-$resumen = [
-    "totalIngresos" => 15015.97,
-    "totalAlumnos" => 348,
-    "cursosActivos" => 4
-];
+// Valores por defecto si no hay ventas
+$totalIngresos = $resumen['total_ingresos'] ?? 0;
+$totalAlumnos = $resumen['total_alumnos'] ?? 0;
+$cursosActivos = count($cursos);
 
-
+// Desglose de pagos (por ahora todo es PayPal, pero puedes agregar más formas después)
 $desglosePagos = [
-    ["forma" => "Tarjeta", "icono" => "fa-credit-card", "monto" => 9500.00],
-    ["forma" => "Efectivo", "icono" => "fa-money-bill", "monto" => 3200.00],
-    ["forma" => "Transferencia", "icono" => "fa-building-columns", "monto" => 2315.97]
+    ["forma" => "PayPal", "icono" => "fa-paypal", "monto" => $totalIngresos]
 ];
 
-
-$cursos = [
-    [
-        "id" => 1,
-        "titulo" => "PHP y MySQL desde Cero",
-        "categoria" => "IT & Software",
-        "colorBadge" => "bg-primary",
-        "alumnos" => 120,
-        "nivelPromedio" => 2.5,
-        "ingresos" => 5998.80
-    ],
-    [
-        "id" => 4,
-        "titulo" => "Python para Data Science",
-        "categoria" => "IT & Software",
-        "colorBadge" => "bg-primary",
-        "alumnos" => 85,
-        "nivelPromedio" => 1.8,
-        "ingresos" => 5099.15
-    ],
-    [
-        "id" => 2,
-        "titulo" => "Marketing Digital Avanzado",
-        "categoria" => "Marketing",
-        "colorBadge" => "bg-success",
-        "alumnos" => 98,
-        "nivelPromedio" => 3.0,
-        "ingresos" => 3918.02
-    ],
-    [
-        "id" => 3,
-        "titulo" => "Introducción a UX/UI",
-        "categoria" => "Diseño",
-        "colorBadge" => "bg-danger",
-        "alumnos" => 45,
-        "nivelPromedio" => 1.2,
-        "ingresos" => 0.00
-    ]
-];
-
-
-$categorias = ["Todas", "IT & Software", "Marketing", "Diseño"];
-
-
-$alumnosDetalle = [
-    [
-        "nombre" => "María González",
-        "avatar" => "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg",
-        "fechaInscripcion" => "15 Ene 2026",
-        "nivel" => 3,
-        "precio" => 49.99,
-        "formaPago" => "Tarjeta"
-    ],
-    [
-        "nombre" => "Carlos Quiroz",
-        "avatar" => "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg",
-        "fechaInscripcion" => "18 Ene 2026",
-        "nivel" => 2,
-        "precio" => 49.99,
-        "formaPago" => "Transferencia"
-    ],
-    [
-        "nombre" => "Ana López",
-        "avatar" => "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg",
-        "fechaInscripcion" => "20 Ene 2026",
-        "nivel" => 1,
-        "precio" => 19.99,
-        "formaPago" => "Efectivo"
-    ]
-];
-
-$totalDetalle = array_sum(array_column($alumnosDetalle, 'precio'));
+$categorias = ["Todas", "IT & Software", "Marketing", "Diseño", "Negocios", "Idiomas"];
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -108,7 +41,6 @@ $totalDetalle = array_sum(array_column($alumnosDetalle, 'precio'));
 </head>
 <body>
 
-   
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background-color: #2c3e50;">
         <div class="container-fluid px-4">
             <a class="navbar-brand fw-bold text-white" href="index.php">
@@ -133,7 +65,7 @@ $totalDetalle = array_sum(array_column($alumnosDetalle, 'precio'));
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="index.php">Inicio</a></li>
-                            <li><a class="dropdown-item" href="#">Mis Cursos</a></li>
+                            <li><a class="dropdown-item" href="adminCategorias.php">Crear Curso</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger" href="logout.php" onclick="return confirm('¿Estás seguro de que quieres cerrar sesión?');">
                                     <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión
@@ -152,7 +84,6 @@ $totalDetalle = array_sum(array_column($alumnosDetalle, 'precio'));
            Panel de Ventas
         </h2>
 
-        
         <div class="row g-3 mb-4">
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm text-white" style="background-color: #16a085;">
@@ -160,7 +91,7 @@ $totalDetalle = array_sum(array_column($alumnosDetalle, 'precio'));
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="text-uppercase mb-1" style="opacity: 0.8;">Total de Ingresos</h6>
-                                <h2 class="fw-bold mb-0">$<?php echo number_format($resumen['totalIngresos'], 2); ?></h2>
+                                <h2 class="fw-bold mb-0">$<?php echo number_format($totalIngresos, 2); ?></h2>
                             </div>
                             <i class="fa-solid fa-dollar-sign fa-2x" style="opacity: 0.5;"></i>
                         </div>
@@ -173,7 +104,7 @@ $totalDetalle = array_sum(array_column($alumnosDetalle, 'precio'));
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="text-uppercase mb-1" style="opacity: 0.8;">Alumnos Inscritos</h6>
-                                <h2 class="fw-bold mb-0"><?php echo $resumen['totalAlumnos']; ?></h2>
+                                <h2 class="fw-bold mb-0"><?php echo $totalAlumnos; ?></h2>
                             </div>
                             <i class="fa-solid fa-users fa-2x" style="opacity: 0.5;"></i>
                         </div>
@@ -186,7 +117,7 @@ $totalDetalle = array_sum(array_column($alumnosDetalle, 'precio'));
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="text-uppercase mb-1" style="opacity: 0.8;">Cursos Activos</h6>
-                                <h2 class="fw-bold mb-0"><?php echo $resumen['cursosActivos']; ?></h2>
+                                <h2 class="fw-bold mb-0"><?php echo $cursosActivos; ?></h2>
                             </div>
                             <i class="fa-solid fa-book fa-2x" style="opacity: 0.5;"></i>
                         </div>
@@ -195,7 +126,6 @@ $totalDetalle = array_sum(array_column($alumnosDetalle, 'precio'));
             </div>
         </div>
 
-        
         <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #e67e22, #f39c12);">
             <div class="card-body text-white">
                 <h5 class="fw-bold mb-3"><i class="fa-solid fa-filter me-2"></i>Filtros</h5>
@@ -230,7 +160,6 @@ $totalDetalle = array_sum(array_column($alumnosDetalle, 'precio'));
             </div>
         </div>
 
-        
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
                 <h5 class="fw-bold mb-3">
@@ -243,32 +172,36 @@ $totalDetalle = array_sum(array_column($alumnosDetalle, 'precio'));
                                 <th>Curso</th>
                                 <th>Categoría</th>
                                 <th>Alumnos Inscritos</th>
-                                <th>Nivel Promedio</th>
                                 <th>Ingresos</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($cursos as $curso): ?>
+                            <?php if (empty($cursos)): ?>
                                 <tr>
-                                    <td class="fw-semibold"><?php echo htmlspecialchars($curso['titulo']); ?></td>
-                                    <td><span class="badge <?php echo $curso['colorBadge']; ?>"><?php echo $curso['categoria']; ?></span></td>
-                                    <td><?php echo $curso['alumnos']; ?></td>
-                                    <td>Nivel <?php echo number_format($curso['nivelPromedio'], 1); ?></td>
-                                    <td class="fw-bold" style="color: #16a085;">
-                                        $<?php echo number_format($curso['ingresos'], 2); ?>
-                                    </td>
-                                    <td>
-                                        <a href="#detalleCurso<?php echo $curso['id']; ?>" class="btn btn-sm btn-outline-secondary">Ver Detalle</a>
-                                    </td>
+                                    <td colspan="5" class="text-center text-muted py-3">No tienes cursos ni ventas aún.</td>
                                 </tr>
-                            <?php endforeach; ?>
+                            <?php else: ?>
+                                <?php foreach ($cursos as $curso): ?>
+                                    <tr>
+                                        <td class="fw-semibold"><?php echo htmlspecialchars($curso['titulo']); ?></td>
+                                        <td><span class="badge bg-primary"><?php echo htmlspecialchars($curso['categoria']); ?></span></td>
+                                        <td><?php echo $curso['alumnos'] ?? 0; ?></td>
+                                        <td class="fw-bold" style="color: #16a085;">
+                                            $<?php echo number_format($curso['ingresos'] ?? 0, 2); ?>
+                                        </td>
+                                        <td>
+                                            <a href="detallesCurso.php?id=<?php echo $curso['id']; ?>" class="btn btn-sm btn-outline-secondary">Ver Curso</a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </tbody>
                         <tfoot class="table-light">
                             <tr>
-                                <td colspan="4" class="text-end fw-bold">Total general:</td>
+                                <td colspan="3" class="text-end fw-bold">Total general:</td>
                                 <td colspan="2" class="fw-bold" style="color: #16a085; font-size: 1.1rem;">
-                                    $<?php echo number_format($resumen['totalIngresos'], 2); ?>
+                                    $<?php echo number_format($totalIngresos, 2); ?>
                                 </td>
                             </tr>
                         </tfoot>
@@ -281,50 +214,6 @@ $totalDetalle = array_sum(array_column($alumnosDetalle, 'precio'));
                                <?php echo $pago['forma']; ?>: $<?php echo number_format($pago['monto'], 2); ?>
                            </span> |
                         <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-
-        
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <h5 class="fw-bold mb-3">
-                    Detalle de Alumnos - PHP y MySQL desde Cero
-                </h5>
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Alumno</th>
-                                <th>Fecha de Inscripción</th>
-                                <th>Nivel de Avance</th>
-                                <th>Precio Pagado</th>
-                                <th>Forma de Pago</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($alumnosDetalle as $alumno): ?>
-                                <tr>
-                                    <td>
-                                        <img src="<?php echo $alumno['avatar']; ?>" class="rounded-circle me-2" width="25" height="25" alt="Avatar">
-                                        <?php echo htmlspecialchars($alumno['nombre']); ?>
-                                    </td>
-                                    <td><?php echo $alumno['fechaInscripcion']; ?></td>
-                                    <td><span class="badge bg-info text-dark">Nivel <?php echo $alumno['nivel']; ?></span></td>
-                                    <td>$<?php echo number_format($alumno['precio'], 2); ?></td>
-                                    <td><?php echo $alumno['formaPago']; ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                        <tfoot class="table-light">
-                            <tr>
-                                <td colspan="3" class="text-end fw-bold">Total del curso:</td>
-                                <td colspan="2" class="fw-bold" style="color: #16a085;">
-                                    $<?php echo number_format($totalDetalle, 2); ?>
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
                 </div>
             </div>
         </div>
