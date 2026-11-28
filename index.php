@@ -7,16 +7,9 @@ $tipoUsuario = $_SESSION['usuario_rol'] ?? 'estudiante';
 $nombreUsuario = $_SESSION['usuario_nombre'] ?? 'Invitado';
 $avatarUsuario = "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg";
 
-$categorias = [
-    "Todas las categorías",
-    "IT & Software",
-    "Marketing",
-    "Diseño",
-    "Negocios",
-    "Idiomas",
-    "Ciencias",
-    "Arte y Música"
-];
+//Ya de una traer categorias reales, bro creo que aqui ya no hay nada simulado
+$modelo = new Curso(); 
+$categoriasReales = $modelo->obtenerCategorias();
 
 // buscador y filtro por categoria
 $busqueda = $_GET['q'] ?? null;
@@ -70,6 +63,7 @@ $cursosMejorCalificados = array_slice($cursosReales, 0, 3);
                                 
                                 <?php if ($tipoUsuario === "instructor" || $tipoUsuario === "admin"): ?>
                                     <li><a class="dropdown-item" href="ventas.php"><i class="fa-solid fa-chart-line me-2"></i>Panel de Ventas</a></li>
+                                    <li><a class="dropdown-item" href="crearCurso.php"><i class="fa-solid fa-plus-circle me-2"></i>Crear Curso</a></li>
                                 <?php endif; ?>
 
                                 <?php if ($tipoUsuario === "admin"): ?>
@@ -118,15 +112,27 @@ $cursosMejorCalificados = array_slice($cursosReales, 0, 3);
                     <div class="card-header text-white fw-bold" style="background-color: #2c3e50;">
                         <i class="fa-solid fa-list me-2"></i>Categorias
                     </div>
-                    <ul class="list-group list-group-flush">
-                        <?php foreach ($categorias as $categoria): ?>
+                        <ul class="list-group list-group-flush">
+                            <!-- Opción fija para ver todas -->
                             <li class="list-group-item">
-                                <a href="index.php?categoria=<?php echo urlencode($categoria); ?>" class="text-decoration-none text-dark">
-                                    <?php echo htmlspecialchars($categoria); ?>
+                                <a href="index.php" class="text-decoration-none text-dark fw-semibold">
+                                    <i class="fa-solid fa-list me-1"></i> Todas las categorias
                                 </a>
                             </li>
-                        <?php endforeach; ?>
-                    </ul>
+    
+                            <!-- Categorias reales desde la BD -->
+                            <?php if (empty($categoriasReales)): ?>
+                                <li class="list-group-item text-muted small">No hay categorias registradas.</li>
+                            <?php else: ?>
+                            <?php foreach ($categoriasReales as $cat): ?>
+                                <li class="list-group-item">
+                                    <a href="index.php?categoria=<?php echo urlencode($cat['nombre']); ?>" class="text-decoration-none text-dark <?php echo ($categoriaSeleccionada === $cat['nombre']) ? 'fw-bold' : ''; ?>">
+                                        <?php echo htmlspecialchars($cat['nombre']); ?>
+                                    </a>
+                                </li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </ul>
                 </div>
             </aside>
 

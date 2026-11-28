@@ -26,12 +26,23 @@ if (empty($data['email']) || empty($data['password'])) {
 $database = new Database();
 $db = $database->connect();
 
-$stmt = $db->prepare("SELECT * FROM usuarios WHERE email = :email AND activo = 1");
+//busca solo el email
+$stmt = $db->prepare("SELECT * FROM usuarios WHERE email = :email");
 $stmt->execute([':email' => $data['email']]);
 $usuario = $stmt->fetch();
 
+//si existe y la contraseña es correcta
 if ($usuario && password_verify($data['password'], $usuario['password'])) {
-    //login exito: reseteamos los intentos a 0
+    
+    //revisa si esta bloqueado
+    if ($usuario['activo'] == 0) {
+        http_response_code(403);
+        echo json_encode(["error" => "Tu cuenta ha sido bloqueada por un administrador. Contacta a soporte."]);
+        exit;
+    }
+
+    //Login exitoso 
+    //reseteamos los intentos
     $reset = $db->prepare("UPDATE usuarios SET intentos_fallidos = 0 WHERE id = :id");
     $reset->execute([':id' => $usuario['id']]);
 
@@ -46,9 +57,10 @@ if ($usuario && password_verify($data['password'], $usuario['password'])) {
         "rol" => $usuario['rol']
     ]);
 } else {
-    //login fallo: sumamos un intento si el usuario existe
+    //si el login falla 
+    //sumamos un intento si el usuario existe
     if ($usuario) {
-        //verifica si ya estaba bloqueado bloqueado
+        //verifica si ya estaba bloqueado 
         if ($usuario['intentos_fallidos'] >= 3) {
             http_response_code(403); 
             echo json_encode(["error" => "Cuenta bloqueada por 3 intentos fallidos."]);
@@ -62,3 +74,5 @@ if ($usuario && password_verify($data['password'], $usuario['password'])) {
     http_response_code(401);
     echo json_encode(["error" => "Credenciales incorrectas"]);
 }
+
+//Ian bro te dejo esto tambien porque se me llega a ir que hacia cada parte de esto

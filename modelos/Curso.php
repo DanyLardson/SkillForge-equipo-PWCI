@@ -43,7 +43,7 @@ class Curso {
         return $stmt->fetchAll();
     }
     
-    // resumen de ventas para un instructor especifico
+    //resumen de ventas para un instructor especifico
     public function obtenerResumenVentas($instructor_id) {
         $query = "SELECT 
                     COUNT(i.id) as total_alumnos,
@@ -72,7 +72,7 @@ class Curso {
         return $stmt->fetchAll();
     }
 
-      // obtener detalles de curso solo por la id
+      //obtener detalles de curso solo por la id
     public function obtenerPorId($id) {
         $stmt = $this->db->prepare("SELECT c.*, u.nombre as instructor_nombre FROM cursos c LEFT JOIN usuarios u ON c.instructor_id = u.id WHERE c.id = :id AND c.activo = 1");
         $stmt->execute([':id' => $id]);
@@ -95,6 +95,54 @@ class Curso {
             ':comentario' => $comentario,
             ':calificacion' => $calificacion
         ]);
+    }
+
+    //para el adminUsuarios.php
+    public function obtenerTodosLosUsuarios() {
+        $stmt = $this->db->query("SELECT id, nombre, email, rol, activo, fecha_registro FROM usuarios ORDER BY fecha_registro DESC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function cambiarEstadoUsuario($id, $activo) {
+        $stmt = $this->db->prepare("UPDATE usuarios SET activo = :activo WHERE id = :id");
+        return $stmt->execute([':activo' => $activo, ':id' => $id]);
+    }
+
+    //para el adminComentarios
+    public function obtenerTodosLosComentarios() {
+        $query = "SELECT c.*, u.nombre as usuario_nombre, cu.titulo as curso_titulo 
+                  FROM comentarios c 
+                  INNER JOIN usuarios u ON c.usuario_id = u.id 
+                  INNER JOIN cursos cu ON c.curso_id = cu.id 
+                  ORDER BY c.fecha_creacion DESC";
+        $stmt = $this->db->query($query);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function eliminarComentario($id, $causa) {
+        $stmt = $this->db->prepare("UPDATE comentarios SET eliminado = 1, razon_eliminacion = :causa, fecha_eliminacion = NOW() WHERE id = :id");
+        return $stmt->execute([':causa' => $causa, ':id' => $id]);
+    }
+
+
+
+    //categorias
+    //obtener todas las categoras
+    public function obtenerCategorias() {
+        $stmt = $this->db->query("SELECT * FROM categorias ORDER BY nombre ASC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    //crear una nueva categoria
+    public function crearCategoria($nombre, $descripcion, $creador_id) {
+        $stmt = $this->db->prepare("INSERT INTO categorias (nombre, descripcion, creador_id) VALUES (:nombre, :descripcion, :creador_id)");
+        return $stmt->execute([':nombre' => $nombre, ':descripcion' => $descripcion, ':creador_id' => $creador_id]);
+    }
+
+    //eliminar una categoria
+    public function eliminarCategoria($id) {
+        $stmt = $this->db->prepare("DELETE FROM categorias WHERE id = :id");
+        return $stmt->execute([':id' => $id]);
     }
 }
 ?>
